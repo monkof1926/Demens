@@ -1,4 +1,6 @@
 #include<PulseSensorPlayground.h>
+#include <LoRa.h>
+
 
 PulseSensorPlayground pulseSensor;
 
@@ -27,7 +29,7 @@ class Puls{
   int pulseFade;  // set fade pin
   int pulseFadeRate; // set fade rate
 
-  volatile int BPM;
+  
   volatile int Signal;
   volatile int IBI = 600;
   volatile boolean Pulse = false;
@@ -55,71 +57,62 @@ class Puls{
     this -> pulseFadeRate = pulseFadeRate;
   }
 
-  void serialOut(){
-    switch(outputType){
-      case PROCESSING_VISUALIZER:
-        sendData('S', Signal); // use the sendDataToSerial function
-        break;
-      case SERIAL_PLOTTER:
-       Serial.print(BPM);
-        Serial.print(",");
-        Serial.print(IBI);
-        Serial.print(",");
-        Serial.println(Signal);
-      break;
-      default:
-      break;
-    } 
-  }
+  // void serialOut(){
+  //   switch(outputType){
+  //     case PROCESSING_VISUALIZER:
+  //       sendData('S', Signal); // use the sendDataToSerial function
+  //       break;
+  //     case SERIAL_PLOTTER:
+  //      Serial.print(BPM);
+  //       Serial.print(",");
+  //       Serial.print(IBI);
+  //       Serial.print(",");
+  //       Serial.println(Signal);
+  //     break;
+  //     default:
+  //     break;
+  //   } 
+  // }
 
   void pulseStart(){
     pulseSensor.analogInput(pulsePin);
     pulseSensor.blinkOnPulse(pulseBlink);
     pulseSensor.fadeOnPulse(pulseFade);
 
-    pulseSensor.setSerial(Serial);
-    pulseSensor.setOutputType(outputType);
+    //pulseSensor.setSerial(Serial);
+    //pulseSensor.setOutputType(outputType);
     pulseSensor.setThreshold(pulseThreshold);
 
-    if(!pulseSensor.begin()){
-      for(;;){
-        digitalWrite(pulseBlink, LOW);
-        delay(50);
-        Serial.println("!");
-        digitalWrite(pulseBlink, HIGH);
-        delay(50);
-      }
-    }
   }
 
 
 
-  void beatHappens(){
-    switch(outputType){
-      case PROCESSING_VISUALIZER:
-      sendData('B', BPM); // send heart rate with a 'B' prefix and time between with 'Q' prefix
-      sendData('Q', IBI);
-      break;
+  // void beatHappens(){
+  //   switch(outputType){
+  //     case PROCESSING_VISUALIZER:
+  //     sendData('B', BPM); // send heart rate with a 'B' prefix and time between with 'Q' prefix
+  //     sendData('Q', IBI);
+  //     break;
 
-      default:
-      break;
-    }
-  }
+  //     default:
+  //     break;
+  //   }
+  // }
 
-  void sendData(char symbol, int data){
-    Serial.print(symbol);
-    Serial.println(data);
-  }
+  // void sendData(char symbol, int data){
+  //   Serial.print(symbol);
+  //   Serial.println(data);
+  // }
 
   void pulseCheck() {
     if(!pulseSensor.begin()){
-      if(pulseSignal > 300){
+      if(pulseSignal > 550){
         pulseSensor.begin();
         Serial.println("The sensor works" + pulseSignal);
       }else if(pulseSignal < 250){
-      for(;;){ // Infinite For loop
+      //for(;;){ // Infinite For loop
         Serial.println("Move the sensor closer");
-      }
+      //}
       }else{
         Serial.print("The pulse sensor is not working");
       }
@@ -141,7 +134,6 @@ class Puls{
       if(--pulseSensor.samplesUntilReport == (byte) 0){
           pulseSensor.samplesUntilReport = SAMPLES_PER_SERIAL_SAMPLE;
           pulseSensor.outputSample();
-
       }
     }
 
@@ -149,4 +141,20 @@ class Puls{
       pulseSensor.outputBeat();
     }
   }
+
+  void bpm3(){
+    if(pulseSensor.sawStartOfBeat()){
+      int BPM = pulseSensor.getBeatsPerMinute();
+      Serial.println("Your BPM is: ");
+      Serial.println(BPM);
+      
+    }
+  }
+
+  // void showBpm(){
+  //   Serial.println(bpm3());
+      // LoRa.beginPacket();
+      // LoRa.print(bpm3());
+      // LoRa.endPacket();
+  // }
 };

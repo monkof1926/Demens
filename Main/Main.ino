@@ -1,4 +1,5 @@
 #include <LoRa.h>
+#include<PulseSensorPlayground.h>
 #include "Gps.h"
 #include "Puls.h"
 #include "LoRa.h"
@@ -26,18 +27,25 @@ int pulseFade = 5; // How long a blink will last for puls sensor
 int pulseFadeRate = 0; //
 
 unsigned long updateTimer = 0;
+unsigned long updateStart = 1000;
 unsigned long start = millis();
 int alarmStatus;
+int pulseThreshold = 550;
 
-Gpss gpss(GPSRxPin, GPSTxPin);
+
+Gpss gps1(GPSRxPin, GPSTxPin);
 Wifi wifi;
-Puls puls(pulsePin, pulseBlink, pulseFade, pulseFadeRate);
+Puls puls1(pulsePin, pulseBlink, pulseFade, pulseFadeRate);
 Lora lora;
+//PulseSensorPlayground pulseSensor;
+
 
 void setup() {
   Serial.begin(115200);
-  GPS.begin(9600, SERIAL_8N1, GPSTxPin, GPSRxPin);   // 34-TX 12-RX
-  puls.pulseStart();
+  GPS.begin(9600, SERIAL_8N1, GPSTxPin, GPSRxPin); 
+  gps1.gpsStart();
+  //puls1.pulseStart();
+  //puls1.pulseCheck();
   SPI.begin(SCK,MISO,MOSI,SS);
   LoRa.setPins(SS,RST,DI0);
   Wire.begin(21, 22);
@@ -51,28 +59,36 @@ void setup() {
   axp.setPowerOutPut(AXP192_DCDC2, AXP202_ON);
   axp.setPowerOutPut(AXP192_EXTEN, AXP202_ON);
   axp.setPowerOutPut(AXP192_DCDC1, AXP202_ON);
+  pulseSensor.analogInput(pulsePin);
+  pulseSensor.blinkOnPulse(pulseBlink);
+  pulseSensor.setThreshold(pulseThreshold);
+
+  if (pulseSensor.begin()) {
+    Serial.println("We created a pulseSensor Object !");  //This prints one time at Arduino power-up,  or on Arduino reset.  
+  }
   Serial.print("LoRa Sender");
-  // while(!LoRa.begin(866E6)){
-  //   Serial.println("L");
-  // LoRa.setSyncWord(0xFF);
-  // Serial.println("LoRa Works"); 
-  // }
-}
-
-void loop() {
-  if(millis() - updateTimer > UPDATEINTERVAL || updateTimer == 0 ){
-    puls.BPM2();
-    puls.pulseCheck();
-    gpss.location();
-
-    lora.LoRaCall();
-    do{
-      while(GPS.available())
-        gps.encode(GPS.read());
-    }while(millis() - start < 1000);
-
-    updateTimer = millis();
+  while(!LoRa.begin(866E6)){
+    Serial.println("L");
+  LoRa.setSyncWord(0xFF);
+  while (1);
+  Serial.println("LoRa Works"); 
   }
 }
 
+void loop() { 
+    //puls1.bpm3();
+  if(millis() - updateTimer > UPDATEINTERVAL || updateTimer == 0 ){
+    gps1.location();
+    gps1.safeZone();
+    gps1.HomeSafeZon();
+    //puls1.BPM2();
+    puls1.bpm3();
+    //puls1.showBpm();
+    //puls1.pulseCheck(); 
+    lora.LoRaCall();
 
+    
+    
+    updateTimer = millis();
+  }      
+}

@@ -29,7 +29,7 @@ class Wifi{
 
       //   }
     }
-
+  
   void displayWifiUpdate() {
   wifiStatus[0] = '\0';
   sprintf(wifiStatus, "%s %s %s %ddBm %i %s",
@@ -50,6 +50,15 @@ class Wifi{
     } else {
       wifiToggle = 0;
       wifi_disconnection_seconds++;
+    }
+  }
+
+  void wifiCheck2(){
+    switch(wifiMulti.run() != WL_CONNECTED){
+      case 1:
+      wifiMulti.addAP(WIFIHOMESSID, WIFIHOMEPASS);
+      break;
+      
     }
   }
 };
