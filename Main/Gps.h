@@ -2,20 +2,22 @@
 #include <axp20x.h>
 #include <LoRa.h>
 
+//tineGps object 
+TinyGPSPlus gps;
+
+double gpsLat = (gps.location.lat(), 6);
+double gpsLon = (gps.location.lng(), 6);  
+double gpsAlt = (gps.altitude.meters());
+
+bool inSafeZone = 0;
+bool inHomeZone = 0;
+
 class Gpss{
 
    public: 
     int GPSRxPin; // Pin for the gps
     int GPSTxPin; // Pin for the gps
     int i = 0;
-
-    //tineGps object 
-    TinyGPSPlus gps;
-
-
-    double gpsLat = (gps.location.lat(), 6);
-    double gpsLon = (gps.location.lng(), 6);  
-    double gpsAlt = (gps.altitude.meters());
 
     double safeZoneYMax = 12.534343;
     double safeZoneYMin = 12.528831;
@@ -30,7 +32,7 @@ class Gpss{
     bool isSafeY = 0;
     bool isSafeX = 0; 
 
-    bool inSafeZone = 0;
+    
 
     String gpsData;
     byte gpsSoft;
@@ -132,6 +134,7 @@ class Gpss{
 
       if(gpsLat > HomeZoneYMin && gpsLat < HomeZoneYMax){
           isSafeY = 1;
+          inHomeZone = 1;
           LoRa.beginPacket();
           LoRa.print("Is Home");
           LoRa.endPacket();
@@ -171,6 +174,7 @@ class Gpss{
 
       if(gpsLon > HomeZoneXMin && gpsLon < HomeZoneXMax){
           isSafeY = 1;
+          inHomeZone = 1;
           LoRa.beginPacket();
           LoRa.print("Is Home");
           LoRa.endPacket();

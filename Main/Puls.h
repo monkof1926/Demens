@@ -5,36 +5,36 @@
 PulseSensorPlayground pulseSensor;
 
 #define ExtremHighPulse 220
-#define HighPulse 150
-#define LowPulse 50
 #define ExtremLowPulse 30
+
+
+int normalPulse;
+int restingPulse;
+int HighPulse = normalPulse + 50;
+int LowPulse = normalPulse - 50;
+int alarmStatus;
+String healthStatus;
 
 class Puls{
   public:
   #define PROCESSING_VISUALIZER 1 
- // #define SERIAL_PLOTTER 2 
 
   volatile int rate[10];
   volatile unsigned long counter = 0;
   volatile unsigned long lastBeatTime = 0;
-  volatile int put = 512; // might need new names
-  volatile int the = 512; // might need new names
-  volatile int trash = 530; // might need new names
-  volatile int amp = 0;
-  volatile boolean firstBeat = true;
-  volatile boolean secondBeat = false;
+  unsigned long PulseTimer = 0;
+  int PulseInterval = 60000;
+  int pulseCounter;
+  int pulseIntervalCounter = 0;
+  int pulseRestInterval = 6000000;
+  int pulseRestCounter;
+  int pulseRestIntervalCounter = 0;
+ 
 
   int pulsePin; // set the pulse pin
   int pulseBlink; // set led pin
   int pulseFade;  // set fade pin
   int pulseFadeRate; // set fade rate
-
-  
-  volatile int Signal;
-  volatile int IBI = 600;
-  volatile boolean Pulse = false;
-  volatile boolean QS = false;
-  int outputType = SERIAL_PLOTTER;
 
 
   unsigned long pulseTimer = 0;
@@ -46,7 +46,6 @@ class Puls{
   int pulseThreshold = 550;
 
   char pulse;
-
   Puls(int pulsePin, int pulseBlink, int pulseFade, int pulseFadeRate){
     this -> pulsePin = pulsePin;
     pinMode(this -> pulsePin, INPUT);
@@ -56,23 +55,6 @@ class Puls{
     pinMode(this -> pulseFade, OUTPUT);
     this -> pulseFadeRate = pulseFadeRate;
   }
-
-  // void serialOut(){
-  //   switch(outputType){
-  //     case PROCESSING_VISUALIZER:
-  //       sendData('S', Signal); // use the sendDataToSerial function
-  //       break;
-  //     case SERIAL_PLOTTER:
-  //      Serial.print(BPM);
-  //       Serial.print(",");
-  //       Serial.print(IBI);
-  //       Serial.print(",");
-  //       Serial.println(Signal);
-  //     break;
-  //     default:
-  //     break;
-  //   } 
-  // }
 
   void pulseStart(){
     pulseSensor.analogInput(pulsePin);
@@ -85,24 +67,6 @@ class Puls{
 
   }
 
-
-
-  // void beatHappens(){
-  //   switch(outputType){
-  //     case PROCESSING_VISUALIZER:
-  //     sendData('B', BPM); // send heart rate with a 'B' prefix and time between with 'Q' prefix
-  //     sendData('Q', IBI);
-  //     break;
-
-  //     default:
-  //     break;
-  //   }
-  // }
-
-  // void sendData(char symbol, int data){
-  //   Serial.print(symbol);
-  //   Serial.println(data);
-  // }
 
   void pulseCheck() {
     if(!pulseSensor.begin()){
@@ -147,14 +111,75 @@ class Puls{
       int BPM = pulseSensor.getBeatsPerMinute();
       Serial.println("Your BPM is: ");
       Serial.println(BPM);
+      LoRa.beginPacket();
+      LoRa.print(BPM);
+      LoRa.endPacket();
+
       
     }
   }
+  int getNormalPulse(){
+    int BPM23 = pulseSensor.getBeatsPerMinute();
+    if(pulseSensor.sawStartOfBeat()){
+      while(pulseSensor.sawNewSample()){
+        pulseCounter += BPM23;
+        pulseIntervalCounter++;
 
-  // void showBpm(){
-  //   Serial.println(bpm3());
-      // LoRa.beginPacket();
-      // LoRa.print(bpm3());
-      // LoRa.endPacket();
-  // }
+        if(pulseIntervalCounter == 10){
+          normalPulse = pulseCounter / 10;
+          Serial.println("Normal Pulse is ");
+          Serial.print(normalPulse);
+          pulseIntervalCounter = 0;
+
+        }
+      }
+      return normalPulse;
+    } else{
+      Serial.println("Move the sensor closer");
+      return normalPulse;
+    }
+  }
+
+  int getRestingPulse(){
+    int BPM24 = pulseSensor.getBeatsPerMinute();
+    if(pulseSensor.sawStartOfBeat()){
+      while(pulseSensor.sawNewSample()){
+        pulseRestCounter += BPM24;
+        pulseRestIntervalCounter++;
+
+        if(pulseRestIntervalCounter == 60){
+          restingPulse = pulseRestCounter / 60;
+          Serial.println("Resting pulse is ");
+          Serial.print(restingPulse);
+          pulseRestIntervalCounter = 0;
+        }
+      }
+      return restingPulse;
+    }else{
+      Serial.println("Move the sensor closer");
+      return restingPulse;
+    }
+  }
+
+
+void normalPulseCheck(){
+  if(normalPulse <= HighPulse){
+    alarmStatus = 1;
+    healthStatus = "High_puls";
+    Serial.println("High pulse please lookout ");
+  }else if(normalPulse <= ExtremHighPulse){
+    alarmStatus = 3;
+    healthStatus = "Extrem_High_puls";
+    Serial.println("Extrem high pulse get them help now!!");
+  }else if(normalPulse >= LowPulse && normalPulse > ExtremLowPulse ){
+    alarmStatus = 1;
+    healthStatus = "Low_puls";
+    Serial.println("Low puls Check it stis ok");
+  }else if(normalPulse >= ExtremLowPulse){
+    alarmStatus = 3;
+    healthStatus = "Extrem_Low_Puls";
+    Serial.println("Extrem low pulse please cheack on patient");
+  }
+}
+
 };

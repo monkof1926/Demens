@@ -13,21 +13,6 @@ class Wifi{
 
     Wifi(){ 
       wifiMulti.addAP(WIFIHOMESSID, WIFIHOMEPASS); // connects with the wifi ssid and password
-
-      // if(wifiMulti.run() != WL_CONNECTED){
-
-      //   wifiMulti.addAP(WIFINEIGHBORSSID, WIFINEIGHBORRPASS);
-
-      //   if(wifiMulti.run() == WL_CONNECTED){
-
-      //     Serial.println("Wifi connneted");
-      //   }
-
-      //  }else if(wifiMulti.run() == WL_CONNECTED) { // check wifi connection
-
-      //   Serial.println("Wifi connneted");
-
-      //   }
     }
   
   void displayWifiUpdate() {
@@ -57,8 +42,16 @@ class Wifi{
     switch(wifiMulti.run() != WL_CONNECTED){
       case 1:
       wifiMulti.addAP(WIFIHOMESSID, WIFIHOMEPASS);
+      Serial.println("Is home");
       break;
-      
+      case 2:
+      wifiMulti.addAP(WIFINEIGHBORSSID, WIFINEIGHBORRPASS);
+      Serial.println(" Is by home");
+      break;
+      case 3:
+      wifiMulti.addAP(GSMSSID, GSMPASS);
+      Serial.println("Is not home");
+      break;
     }
   }
 };

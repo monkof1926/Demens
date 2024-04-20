@@ -1,11 +1,14 @@
 #include <LoRa.h>
 #include<PulseSensorPlayground.h>
+#include<HTTPClient.h>
 #include "Gps.h"
 #include "Puls.h"
 #include "LoRa.h"
 #include "Wifi.h"
 
 #define UPDATEINTERVAL 6000
+#define Name "Lukas"
+#define Unit "unit_1"
 
 #define SCK     5    // GPIO5  -- SX1278's SCK
 #define MISO    19   // GPIO19 -- SX1278's MISnO
@@ -16,7 +19,7 @@
 
 AXP20X_Class axp;
 HardwareSerial GPS(1);
-TinyGPSPlus gps;
+HTTPClient http;
 
 int GPSRxPin = 12; // Pin for the gps
 int GPSTxPin = 34; // Pin for the gps
@@ -29,14 +32,25 @@ int pulseFadeRate = 0; //
 unsigned long updateTimer = 0;
 unsigned long updateStart = 1000;
 unsigned long start = millis();
-int alarmStatus;
 int pulseThreshold = 550;
 
+
+double gpsTestLat = (gps.location.lat(), 6);
+double gpsTestLon = (gps.location.lng(), 6);  
+double gpsTestAlt = (gps.altitude.meters());
+
+String finalurl; 
+String url = "https://script.google.com/macros/s/AKfycbz1K4MYYsL3T1SCzMg-IdQHlcDnU4ZOD9UOdboWzqJxObJPz1T0q8ajcOFupvZ4vEi9/exec?";
+String api_key = "AKfycbz1K4MYYsL3T1SCzMg-IdQHlcDnU4ZOD9UOdboWzqJxObJPz1T0q8ajcOFupvZ4vEi9";
+String payload;
+
+int temp = 37;
 
 Gpss gps1(GPSRxPin, GPSTxPin);
 Wifi wifi;
 Puls puls1(pulsePin, pulseBlink, pulseFade, pulseFadeRate);
 Lora lora;
+String needHelp = "No";
 //PulseSensorPlayground pulseSensor;
 
 
@@ -46,6 +60,8 @@ void setup() {
   gps1.gpsStart();
   //puls1.pulseStart();
   //puls1.pulseCheck();
+  wifi.wifiCheck();
+  wifi.wifiCheck2();
   SPI.begin(SCK,MISO,MOSI,SS);
   LoRa.setPins(SS,RST,DI0);
   Wire.begin(21, 22);
@@ -75,20 +91,50 @@ void setup() {
   }
 }
 
+void health(){
+
+}
+
 void loop() { 
-    //puls1.bpm3();
   if(millis() - updateTimer > UPDATEINTERVAL || updateTimer == 0 ){
     gps1.location();
     gps1.safeZone();
     gps1.HomeSafeZon();
-    //puls1.BPM2();
     puls1.bpm3();
-    //puls1.showBpm();
-    //puls1.pulseCheck(); 
+    puls1.getNormalPulse();
+    puls1.getRestingPulse();
+    puls1.normalPulseCheck();
+    wifi.wifiCheck2(); 
     lora.LoRaCall();
 
-    
+    statusupdate();
     
     updateTimer = millis();
   }      
+}
+
+String statusupdate(){
+  Serial.print("[HTTP] begin...\n");
+
+  String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&puls=" + normalPulse  + "&temp=" + temp + "&latitude=" + gpsLat + "&longitude=" + gpsLon + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
+
+  http.begin(finalurl);
+
+  int httpCode = http.GET();
+
+  if (httpCode > 0) {
+    Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+
+    // file found at server
+    if (httpCode == HTTP_CODE_OK) {
+      payload = http.getString();
+      Serial.println(payload);
+    }
+  } else {
+    Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+  }
+  // No longer looks for response
+  http.end(); //Free's the resources
+
+  return payload;
 }
