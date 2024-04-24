@@ -40,8 +40,8 @@ double gpsTestLon = (gps.location.lng(), 6);
 double gpsTestAlt = (gps.altitude.meters());
 
 String finalurl; 
-String url = "https://script.google.com/macros/s/AKfycbz1K4MYYsL3T1SCzMg-IdQHlcDnU4ZOD9UOdboWzqJxObJPz1T0q8ajcOFupvZ4vEi9/exec?";
-String api_key = "AKfycbz1K4MYYsL3T1SCzMg-IdQHlcDnU4ZOD9UOdboWzqJxObJPz1T0q8ajcOFupvZ4vEi9";
+String url = "https://script.google.com/macros/s/AKfycbwHh7nkWtx6QW5dDdYd0U9nFj4ts0iWXiokkUSIZvDoE0AqEG834wgrDwhWoish8kcG/exec?";
+String api_key = "AKfycbwHh7nkWtx6QW5dDdYd0U9nFj4ts0iWXiokkUSIZvDoE0AqEG834wgrDwhWoish8kcG";
 String payload;
 
 int temp = 37;
@@ -58,8 +58,6 @@ void setup() {
   Serial.begin(115200);
   GPS.begin(9600, SERIAL_8N1, GPSTxPin, GPSRxPin); 
   gps1.gpsStart();
-  //puls1.pulseStart();
-  //puls1.pulseCheck();
   wifi.wifiCheck();
   wifi.wifiCheck2();
   SPI.begin(SCK,MISO,MOSI,SS);
@@ -101,6 +99,7 @@ void loop() {
     gps1.safeZone();
     gps1.HomeSafeZon();
     puls1.bpm3();
+    Serial.println(puls1.bpm3());
     puls1.getNormalPulse();
     puls1.getRestingPulse();
     puls1.normalPulseCheck();
@@ -116,8 +115,8 @@ void loop() {
 String statusupdate(){
   Serial.print("[HTTP] begin...\n");
 
-  String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&puls=" + normalPulse  + "&temp=" + temp + "&latitude=" + gpsLat + "&longitude=" + gpsLon + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
-
+  String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&puls=" + BPM  + "&temp=" + temp + "&latitude=" + gpsLat + "&longitude=" + gpsLon + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
+  Serial.println(finalurl);
   http.begin(finalurl);
 
   int httpCode = http.GET();

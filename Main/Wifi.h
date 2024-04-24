@@ -12,7 +12,7 @@ class Wifi{
   int wifi_disconnection_seconds = 0;
 
     Wifi(){ 
-      wifiMulti.addAP(WIFIHOMESSID, WIFIHOMEPASS); // connects with the wifi ssid and password
+      wifiMulti.addAP(WIFINEIGHBORSSID, WIFINEIGHBORRPASS); // connects with the wifi ssid and password
     }
   
   void displayWifiUpdate() {

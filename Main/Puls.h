@@ -7,8 +7,8 @@ PulseSensorPlayground pulseSensor;
 #define ExtremHighPulse 220
 #define ExtremLowPulse 30
 
-
-int normalPulse;
+int BPM = pulseSensor.getBeatsPerMinute();
+int normalPulse = 0;
 int restingPulse;
 int HighPulse = normalPulse + 50;
 int LowPulse = normalPulse - 50;
@@ -106,17 +106,17 @@ class Puls{
     }
   }
 
-  void bpm3(){
+  int bpm3(){
     if(pulseSensor.sawStartOfBeat()){
-      int BPM = pulseSensor.getBeatsPerMinute();
+      int BPM21 = pulseSensor.getBeatsPerMinute();
       Serial.println("Your BPM is: ");
-      Serial.println(BPM);
+      Serial.println(BPM21);
       LoRa.beginPacket();
-      LoRa.print(BPM);
-      LoRa.endPacket();
-
-      
+      LoRa.print(BPM21);
+      LoRa.endPacket();   
+      BPM = BPM21;  
     }
+    return BPM;
   }
   int getNormalPulse(){
     int BPM23 = pulseSensor.getBeatsPerMinute();
@@ -163,23 +163,26 @@ class Puls{
 
 
 void normalPulseCheck(){
-  if(normalPulse <= HighPulse){
-    alarmStatus = 1;
-    healthStatus = "High_puls";
-    Serial.println("High pulse please lookout ");
+  if(normalPulse == 0){
+    alarmStatus = 0;
+    healthStatus = "Need_more_time";
+    Serial.println("Need more time to get normal pulse ");
+  }else if(normalPulse <= HighPulse){
+      alarmStatus = 1;
+      healthStatus = "High_puls";
+      Serial.println("High pulse please lookout ");
   }else if(normalPulse <= ExtremHighPulse){
-    alarmStatus = 3;
-    healthStatus = "Extrem_High_puls";
-    Serial.println("Extrem high pulse get them help now!!");
+      alarmStatus = 3;
+      healthStatus = "Extrem_High_puls";
+      Serial.println("Extrem high pulse get them help now!!");
   }else if(normalPulse >= LowPulse && normalPulse > ExtremLowPulse ){
-    alarmStatus = 1;
-    healthStatus = "Low_puls";
-    Serial.println("Low puls Check it stis ok");
+      alarmStatus = 1;
+      healthStatus = "Low_puls";
+      Serial.println("Low puls Check it stis ok");
   }else if(normalPulse >= ExtremLowPulse){
-    alarmStatus = 3;
-    healthStatus = "Extrem_Low_Puls";
-    Serial.println("Extrem low pulse please cheack on patient");
+      alarmStatus = 3;
+      healthStatus = "Extrem_Low_Puls";
+      Serial.println("Extrem low pulse please cheack on patient");
+    }
   }
-}
-
 };
