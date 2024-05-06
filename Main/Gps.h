@@ -5,8 +5,9 @@
 //tineGps object 
 TinyGPSPlus gps;
 
-double gpsLat = (gps.location.lat(), 6);
-double gpsLon = (gps.location.lng(), 6);  
+
+double gpsLat = 6;
+double gpsLon = 6;
 double gpsAlt = (gps.altitude.meters());
 
 bool inSafeZone = 0;
@@ -29,6 +30,11 @@ class Gpss{
     double HomeZoneXMax = 55.719217;
     double HomeZoneXMin = 55.719082;
 
+    double HomeZoneLat;
+    double HomeZoneLon;
+    double HomeZoneRadius = 50.0; // meters
+    double SafeZoneRadius = 250; // meters
+
     bool isSafeY = 0;
     bool isSafeX = 0; 
 
@@ -49,17 +55,22 @@ class Gpss{
   }
   
   void location(){
-      if(gpsLat == 0 || gpsLon == 0){
+    gpsLat = gps.location.lat();
+    gpsLon = gps.location.lng();
+
+      if(gpsLat == 6 || gpsLon == 6){
       Serial.print(".");
       i++;
       if(i%30 == 0){
-        Serial.print("");
+        Serial.print("Gps Starting");
       }
       if(i == 300){
         Serial.println("Gps not working try going out side");
       }
-    }
-
+    }else{
+      
+      HomeZoneLat = gpsLat;
+      HomeZoneLon = gpsLon;
       gpsData = "[";
       gpsData += String(gpsLat, 6);
       gpsData += ",";
@@ -70,7 +81,59 @@ class Gpss{
       LoRa.beginPacket();
       LoRa.print(gpsData);
       LoRa.endPacket();
+    }
+  }
 
+  void HomeZoneCheck(){
+    while(gpsLat != 6 && gpsLon != 6){
+      if(gpsLat == 6 && gpsLon == 6){
+        HomeZoneLat = 55.718830;
+        HomeZoneLon = 12.530630;
+      }
+      if(distance(gpsLat, gpsLon, HomeZoneLat, HomeZoneLon) > HomeZoneRadius ){
+        inHomeZone = 1;
+        Serial.print(HomeZoneLat);
+        Serial.println("Is home");
+        LoRa.beginPacket();
+        LoRa.print(inHomeZone);
+        LoRa.endPacket();
+      }else{
+        inHomeZone = 0;
+      
+       }
+    }
+  }
+
+  void SafeZoneCheck(){
+    while(gpsLat != 6 && gpsLon != 6 && inHomeZone == 0){
+      if(gpsLat == 6 && gpsLon == 6){
+        HomeZoneLat = 55.718830;
+        HomeZoneLon = 12.530630;
+      }
+      if(distance(gpsLat, gpsLon, HomeZoneLat, HomeZoneLon) > SafeZoneRadius ){
+        inSafeZone = 1;
+        Serial.println("is in safe zone");
+        LoRa.beginPacket();
+        LoRa.print(inSafeZone);
+        LoRa.endPacket();
+      }
+    }
+  }
+
+  double distance(double lat1, double lon1, double lat2, double lon2 ){
+    double earthRadius = 6371000;
+    double radius1 = radians(lat1);
+    double radius2 = radians(lat2);
+    double deltaPhi = radians(lat2 - lat1);
+    double deltaLamda = radians(lon2 - lon1);
+
+    double a = sin(deltaPhi/2) * sin(deltaPhi/2) + cos(radius1) * cos(radius2) * sin(deltaLamda/2) * sin(deltaLamda/2);
+
+    double c = 2 * atan2(sqrt(a), sqrt(1-a)); // atan2 returns the angle between a positive x and a point
+
+    double d = earthRadius * c;
+
+    return d;
   }
 
   void safeZone(){
@@ -122,7 +185,7 @@ class Gpss{
     }
   }
 
-  void HomeSafeZon(){
+  void HomeSafeZone(){
     if(gpsLat != 6 && gpsLon != 6){
         double checkHomeZoneMax =
         (unsigned long)TinyGPSPlus::distanceBetween(

@@ -10,6 +10,14 @@ class Wifi{
   char wifiStatus[512];
   boolean wifiToggle = 0;
   int wifi_disconnection_seconds = 0;
+  String ssid = WIFIHOMESSID;
+  String pass = WIFIHOMEPASS;
+
+  void wifiStart(){
+    ssid = WIFIHOMESSID;
+    pass = WIFIHOMEPASS;
+    Serial.println("Trying home wifi ");
+  }
 
     Wifi(){ 
       wifiMulti.addAP(WIFINEIGHBORSSID, WIFINEIGHBORRPASS); // connects with the wifi ssid and password
@@ -42,16 +50,28 @@ class Wifi{
     switch(wifiMulti.run() != WL_CONNECTED){
       case 1:
       wifiMulti.addAP(WIFIHOMESSID, WIFIHOMEPASS);
+      ssid = WIFIHOMESSID;
+      pass = WIFIHOMEPASS;
+      Serial.print(ssid);
       Serial.println("Is home");
       break;
       case 2:
       wifiMulti.addAP(WIFINEIGHBORSSID, WIFINEIGHBORRPASS);
+      ssid = WIFINEIGHBORSSID;
+      pass = WIFINEIGHBORRPASS;
+      Serial.print(ssid);
       Serial.println(" Is by home");
       break;
       case 3:
       wifiMulti.addAP(GSMSSID, GSMPASS);
+      ssid = GSMSSID;
+      pass = GSMPASS;
+      Serial.print(ssid);
       Serial.println("Is not home");
       break;
     }
+  }
+  String wifitest(){
+
   }
 };

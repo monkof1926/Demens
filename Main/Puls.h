@@ -61,7 +61,7 @@ class Puls{
     pulseSensor.blinkOnPulse(pulseBlink);
     pulseSensor.fadeOnPulse(pulseFade);
 
-    //pulseSensor.setSerial(Serial);
+    pulseSensor.setSerial(Serial);
     //pulseSensor.setOutputType(outputType);
     pulseSensor.setThreshold(pulseThreshold);
 

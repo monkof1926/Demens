@@ -1,10 +1,12 @@
 #include <LoRa.h>
 #include<PulseSensorPlayground.h>
 #include<HTTPClient.h>
+#include <OneWire.h>
 #include "Gps.h"
 #include "Puls.h"
 #include "LoRa.h"
 #include "Wifi.h"
+#include "Temperature.h"
 
 #define UPDATEINTERVAL 6000
 #define Name "Lukas"
@@ -17,9 +19,6 @@
 #define RST     14   // GPIO14 -- SX1278's RESET
 #define DI0     26   // GPIO26 -- SX1278's IRQ(Interrupt Request)
 
-AXP20X_Class axp;
-HardwareSerial GPS(1);
-HTTPClient http;
 
 int GPSRxPin = 12; // Pin for the gps
 int GPSTxPin = 34; // Pin for the gps
@@ -27,38 +26,43 @@ int GPSTxPin = 34; // Pin for the gps
 const int pulsePin = 35; // Pin for PulseSensor might need to change to 0
 const int pulseBlink = LED_BUILTIN; // Led for puls sensor Might need to change to 35
 int pulseFade = 5; // How long a blink will last for puls sensor
-int pulseFadeRate = 0; //
+int pulseFadeRate = 0; // how long it takes for the fading takes
+
+
 
 unsigned long updateTimer = 0;
 unsigned long updateStart = 1000;
 unsigned long start = millis();
 int pulseThreshold = 550;
 
-
-double gpsTestLat = (gps.location.lat(), 6);
-double gpsTestLon = (gps.location.lng(), 6);  
-double gpsTestAlt = (gps.altitude.meters());
-
 String finalurl; 
-String url = "https://script.google.com/macros/s/AKfycbwHh7nkWtx6QW5dDdYd0U9nFj4ts0iWXiokkUSIZvDoE0AqEG834wgrDwhWoish8kcG/exec?";
-String api_key = "AKfycbwHh7nkWtx6QW5dDdYd0U9nFj4ts0iWXiokkUSIZvDoE0AqEG834wgrDwhWoish8kcG";
+String url = "https://script.google.com/macros/s/AKfycbzQdija-bhmHUIo_8SYeGyZhftxXBjiEZiswR9ajAqFUqpOA5hRqdJlAScjDWILAwiXHg/exec?";
+String api_key = "AKfycbzQdija-bhmHUIo_8SYeGyZhftxXBjiEZiswR9ajAqFUqpOA5hRqdJlAScjDWILAwiXHg";
 String payload;
 
-int temp = 37;
 
 Gpss gps1(GPSRxPin, GPSTxPin);
 Wifi wifi;
 Puls puls1(pulsePin, pulseBlink, pulseFade, pulseFadeRate);
 Lora lora;
+
 String needHelp = "No";
-//PulseSensorPlayground pulseSensor;
+
+AXP20X_Class axp;
+HardwareSerial GPS(1);
+HTTPClient http;
+Temperature temperature(temperaturePin);
+
 
 
 void setup() {
   Serial.begin(115200);
   GPS.begin(9600, SERIAL_8N1, GPSTxPin, GPSRxPin); 
   gps1.gpsStart();
+  wifi.wifiStart();
   wifi.wifiCheck();
+  oneWire.begin(9600);
+  sensors.begin();
   wifi.wifiCheck2();
   SPI.begin(SCK,MISO,MOSI,SS);
   LoRa.setPins(SS,RST,DI0);
@@ -96,15 +100,30 @@ void health(){
 void loop() { 
   if(millis() - updateTimer > UPDATEINTERVAL || updateTimer == 0 ){
     gps1.location();
-    gps1.safeZone();
-    gps1.HomeSafeZon();
+    //gps1.safeZone();
+    //gps1.HomeZoneCheck();
+    //gps1.SafeZoneCheck();
+    //gps1.HomeSafeZone();
+    Serial.print("Latitue: ");
+    Serial.println(gpsLat);
+    Serial.print("Lontitue: ");
+    Serial.println(gpsLon); 
     puls1.bpm3();
     Serial.println(puls1.bpm3());
     puls1.getNormalPulse();
     puls1.getRestingPulse();
     puls1.normalPulseCheck();
+    temperature.tempCheck();
+    temperature.normalTempCheck();
+    temperature.TempStatus();
     wifi.wifiCheck2(); 
     lora.LoRaCall();
+
+  do
+    {
+      while (GPS.available())
+        gps.encode(GPS.read());
+    } while (millis() - start < 1000);
 
     statusupdate();
     
@@ -115,7 +134,30 @@ void loop() {
 String statusupdate(){
   Serial.print("[HTTP] begin...\n");
 
+   
+  // if(inHomeZone == 0 && inSafeZone == 0){
+
+  //   String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&puls=" + BPM  + "&temp=" + temp + "&latitude=" + gpsLat + "&longitude=" + gpsLon + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
+
+
+  // }else if(inHomeZone == 0 && inSafeZone == 1){
+
+  //    String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
+
+  // }else if(inHomeZone == 1){
+
+  //     String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&ishome=" + inHomeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
+
+  // }else {
+
+  //   String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&puls=" + BPM  + "&temp=" + temp + "&latitude=" + gpsLat + "&longitude=" + gpsLon + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
+
+  // }
+
   String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&puls=" + BPM  + "&temp=" + temp + "&latitude=" + gpsLat + "&longitude=" + gpsLon + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
+
+  //String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&ishome=" + inHomeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
+
   Serial.println(finalurl);
   http.begin(finalurl);
 
