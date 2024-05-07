@@ -13,7 +13,7 @@ int restingPulse;
 int HighPulse = normalPulse + 50;
 int LowPulse = normalPulse - 50;
 int alarmStatus;
-String healthStatus;
+int pulseStatus;
 
 class Puls{
   public:
@@ -165,23 +165,23 @@ class Puls{
 void normalPulseCheck(){
   if(normalPulse == 0){
     alarmStatus = 0;
-    healthStatus = "Need_more_time";
+    pulseStatus = 0;
     Serial.println("Need more time to get normal pulse ");
   }else if(normalPulse <= HighPulse){
       alarmStatus = 1;
-      healthStatus = "High_puls";
+      pulseStatus = 1;
       Serial.println("High pulse please lookout ");
   }else if(normalPulse <= ExtremHighPulse){
       alarmStatus = 3;
-      healthStatus = "Extrem_High_puls";
+      pulseStatus = 2;
       Serial.println("Extrem high pulse get them help now!!");
   }else if(normalPulse >= LowPulse && normalPulse > ExtremLowPulse ){
       alarmStatus = 1;
-      healthStatus = "Low_puls";
+      pulseStatus = 3;
       Serial.println("Low puls Check it stis ok");
   }else if(normalPulse >= ExtremLowPulse){
       alarmStatus = 3;
-      healthStatus = "Extrem_Low_Puls";
+      pulseStatus = 4;
       Serial.println("Extrem low pulse please cheack on patient");
     }
   }

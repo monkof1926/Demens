@@ -22,8 +22,12 @@ class Lora{
     // ttn.personalize(devAddr, nwkSKey, appSKey);
 
     LoRa.beginPacket();
-    LoRa.print("Hallo");
-    LoRa.print(counter);
+    //LoRa.print(Name);
+    //LoRa.print(Unit);
+    LoRa.print(gpsLat);
+    LoRa.print(gpsLon);
+    LoRa.print(BPM);
+    //LoRa.print(temp);
     LoRa.endPacket();
 
     counter++;

@@ -66,6 +66,10 @@ class Gpss{
       }
       if(i == 300){
         Serial.println("Gps not working try going out side");
+        HomeZoneLat = 55.718830;
+        HomeZoneLon = 12.530630;
+        Serial.print(HomeZoneLat);
+        Serial.println(HomeZoneLon);
       }
     }else{
       
@@ -86,10 +90,10 @@ class Gpss{
 
   void HomeZoneCheck(){
     while(gpsLat != 6 && gpsLon != 6){
-      if(gpsLat == 6 && gpsLon == 6){
-        HomeZoneLat = 55.718830;
-        HomeZoneLon = 12.530630;
-      }
+      // if(gpsLat == 6 && gpsLon == 6){
+      //   HomeZoneLat = 55.718830;
+      //   HomeZoneLon = 12.530630;
+      // }
       if(distance(gpsLat, gpsLon, HomeZoneLat, HomeZoneLon) > HomeZoneRadius ){
         inHomeZone = 1;
         Serial.print(HomeZoneLat);
@@ -106,10 +110,9 @@ class Gpss{
 
   void SafeZoneCheck(){
     while(gpsLat != 6 && gpsLon != 6 && inHomeZone == 0){
-      if(gpsLat == 6 && gpsLon == 6){
-        HomeZoneLat = 55.718830;
-        HomeZoneLon = 12.530630;
-      }
+      // if(gpsLat == 6 && gpsLon == 6){
+        
+      // }
       if(distance(gpsLat, gpsLon, HomeZoneLat, HomeZoneLon) > SafeZoneRadius ){
         inSafeZone = 1;
         Serial.println("is in safe zone");

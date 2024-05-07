@@ -7,6 +7,7 @@
 #include "LoRa.h"
 #include "Wifi.h"
 #include "Temperature.h"
+#include "Health.h"
 
 #define UPDATEINTERVAL 6000
 #define Name "Lukas"
@@ -45,6 +46,7 @@ Gpss gps1(GPSRxPin, GPSTxPin);
 Wifi wifi;
 Puls puls1(pulsePin, pulseBlink, pulseFade, pulseFadeRate);
 Lora lora;
+Health health;
 
 String needHelp = "No";
 
@@ -93,10 +95,6 @@ void setup() {
   }
 }
 
-void health(){
-
-}
-
 void loop() { 
   if(millis() - updateTimer > UPDATEINTERVAL || updateTimer == 0 ){
     gps1.location();
@@ -116,6 +114,7 @@ void loop() {
     temperature.tempCheck();
     temperature.normalTempCheck();
     temperature.TempStatus();
+    health.healthbuilt();
     wifi.wifiCheck2(); 
     lora.LoRaCall();
 
@@ -124,11 +123,34 @@ void loop() {
       while (GPS.available())
         gps.encode(GPS.read());
     } while (millis() - start < 1000);
-
+    urlUpdate();
     statusupdate();
     
     updateTimer = millis();
   }      
+}
+
+String urlUpdate(){
+
+     
+  if(inHomeZone == 0 && inSafeZone == 0 || ExtremHealth == 1){
+
+    finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&puls=" + BPM  + "&temp=" + temp + "&latitude=" + gpsLat + "&longitude=" + gpsLon + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
+    return finalurl;
+
+  }else if(inHomeZone == 0 && inSafeZone == 1){
+
+      finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
+      return finalurl;
+  }else if(inHomeZone == 1){
+
+      finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&ishome=" + inHomeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
+      return finalurl;
+  }else {
+
+    finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&puls=" + BPM  + "&temp=" + temp + "&latitude=" + gpsLat + "&longitude=" + gpsLon + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
+    return finalurl;
+  }
 }
 
 String statusupdate(){
@@ -154,7 +176,7 @@ String statusupdate(){
 
   // }
 
-  String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&puls=" + BPM  + "&temp=" + temp + "&latitude=" + gpsLat + "&longitude=" + gpsLon + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
+  // String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&puls=" + BPM  + "&temp=" + temp + "&latitude=" + gpsLat + "&longitude=" + gpsLon + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
 
   //String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&ishome=" + inHomeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
 
