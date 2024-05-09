@@ -10,7 +10,7 @@ class Health{
 
   int calculateHealthScore(){
     healthScore = tempStatus + pulseStatus;
-    while(healthScore != 0){
+    while(healthScore == 0){
       if(tempStatus == 5 || tempStatus == 20 || pulseStatus == 5 || pulseStatus == 20){
         Serial.println("Check on them");
         ExtremHealth = 1;
@@ -33,27 +33,27 @@ class Health{
   String healthbuilt(){
       while(healthScore == 0){
         switch(healthScore){
-          case 100: // Good health
+          case 81 ... 100: // Good health
             healthStatus = "All_good";
             Serial.print("All good ");
             alarmStatus = 0;
             return healthStatus;
           break;
-          case 80:// high pulse
+          case 78 ... 80:// high pulse
             healthStatus = "High_pulse";
             Serial.print("High pulse ");
             Serial.println(BPM);
             alarmStatus = 1;
             return healthStatus;
           break;
-          case 77: // High temperature
+          case 71 ... 77: // High temperature
             healthStatus = "High_temperature";
             Serial.print("Temperature is high ");
             Serial.println(temp);
             alarmStatus = 1;
             return healthStatus;
           break;
-          case 70:
+          case 64 ... 70:
             healthStatus = "Extremly_high_pulse";
             Serial.print("Extremly high pulse ");
             Serial.println(BPM);
@@ -61,7 +61,7 @@ class Health{
             ExtremHealth = 1;
             return healthStatus;
           break;
-          case 63:
+          case 61 ... 63:
             healthStatus = "Extremly_high_temperature";
             Serial.print("Extremly high temperature ");
             Serial.println(temp);
@@ -69,7 +69,7 @@ class Health{
             ExtremHealth = 1;
             return healthStatus;
           break;
-          case 60:
+          case 58 ... 60:
             healthStatus = "Low_pulse";
             Serial.print("Low pulse ");
             Serial.println(BPM);
@@ -116,6 +116,13 @@ class Health{
             ExtremHealth = 1;
             return healthStatus;
           break;
+          case 27:
+            healthStatus = "Temp good don't know pulse";
+            Serial.print("pulse don't work");
+            Serial.println(BPM);
+            alarmStatus = 0;
+            return healthStatus;
+          break;
           case 17:
             healthStatus = "Low_temperature_and_pulse";
             Serial.print("Low temperature and pulse ");
@@ -140,10 +147,9 @@ class Health{
           break;
           defualt:
             healthStatus = "All_good";
-            Serial.print("All good ");
+            Serial.println("All good ");
             alarmStatus = 0;
             return healthStatus;
-          break;
         }
       }
     }
