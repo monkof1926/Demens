@@ -114,7 +114,10 @@ void loop() {
     temperature.tempCheck();
     temperature.normalTempCheck();
     temperature.TempStatus();
+    health.calculateHealthScore();
     health.healthbuilt();
+    health.ExtremHealthStatus();
+    health.coldTemperature();
     wifi.wifiCheck2(); 
     lora.LoRaCall();
 
@@ -127,7 +130,7 @@ void loop() {
     statusupdate();
     
     updateTimer = millis();
-  }      
+  }     
 }
 
 String urlUpdate(){
@@ -155,30 +158,6 @@ String urlUpdate(){
 
 String statusupdate(){
   Serial.print("[HTTP] begin...\n");
-
-   
-  // if(inHomeZone == 0 && inSafeZone == 0){
-
-  //   String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&puls=" + BPM  + "&temp=" + temp + "&latitude=" + gpsLat + "&longitude=" + gpsLon + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
-
-
-  // }else if(inHomeZone == 0 && inSafeZone == 1){
-
-  //    String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
-
-  // }else if(inHomeZone == 1){
-
-  //     String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&ishome=" + inHomeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
-
-  // }else {
-
-  //   String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&puls=" + BPM  + "&temp=" + temp + "&latitude=" + gpsLat + "&longitude=" + gpsLon + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
-
-  // }
-
-  // String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&puls=" + BPM  + "&temp=" + temp + "&latitude=" + gpsLat + "&longitude=" + gpsLon + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
-
-  //String finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&ishome=" + inHomeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
 
   Serial.println(finalurl);
   http.begin(finalurl);

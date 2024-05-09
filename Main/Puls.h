@@ -5,13 +5,17 @@
 PulseSensorPlayground pulseSensor;
 
 #define ExtremHighPulse 220
+#define ExtremHighNormalPulse 220
 #define ExtremLowPulse 30
+#define ExtremLowNormalPulse 30
 
 int BPM = pulseSensor.getBeatsPerMinute();
 int normalPulse = 0;
 int restingPulse;
-int HighPulse = normalPulse + 50;
-int LowPulse = normalPulse - 50;
+int HighPulse = BPM + 50;
+int LowPulse = BPM - 50;
+int HighNormalPulse = normalPulse + 50;
+int LowNormalPulse = normalPulse - 50;
 int alarmStatus;
 int pulseStatus;
 
@@ -140,6 +144,37 @@ class Puls{
     }
   }
 
+  //Health status uses temphealth and puslsestatus to calculate overall health score for good health a score of 80 to 100 is need
+  // all good = 50
+  // high pulse = 30
+  // extremly high pulse = 20
+  // low pulse = 10
+  // extremly low pulse = 5
+  
+  void pulsStatus(){
+    if(BPM == 0){
+    alarmStatus = 0;
+    pulseStatus = 0;
+    Serial.println("Need more time to get normal pulse ");
+  }else if(BPM <= HighPulse){
+      alarmStatus = 1;
+      pulseStatus = 30;
+      Serial.println("High pulse please lookout ");
+  }else if(BPM <= ExtremHighPulse){
+      alarmStatus = 3;
+      pulseStatus = 20;
+      Serial.println("Extrem high pulse get them help now!!");
+  }else if(BPM >= LowPulse){
+      alarmStatus = 1;
+      pulseStatus = 10;
+      Serial.println("Low puls Check it stis ok");
+  }else if(BPM >= ExtremLowPulse){
+      alarmStatus = 3;
+      pulseStatus = 5;
+      Serial.println("Extrem low pulse please cheack on patient");
+    }
+  }
+
   int getRestingPulse(){
     int BPM24 = pulseSensor.getBeatsPerMinute();
     if(pulseSensor.sawStartOfBeat()){
@@ -167,19 +202,19 @@ void normalPulseCheck(){
     alarmStatus = 0;
     pulseStatus = 0;
     Serial.println("Need more time to get normal pulse ");
-  }else if(normalPulse <= HighPulse){
+  }else if(normalPulse <= HighNormalPulse){
       alarmStatus = 1;
       pulseStatus = 1;
       Serial.println("High pulse please lookout ");
-  }else if(normalPulse <= ExtremHighPulse){
+  }else if(normalPulse <= ExtremHighNormalPulse){
       alarmStatus = 3;
       pulseStatus = 2;
       Serial.println("Extrem high pulse get them help now!!");
-  }else if(normalPulse >= LowPulse && normalPulse > ExtremLowPulse ){
+  }else if(normalPulse >= LowNormalPulse && normalPulse > ExtremLowNormalPulse ){
       alarmStatus = 1;
       pulseStatus = 3;
       Serial.println("Low puls Check it stis ok");
-  }else if(normalPulse >= ExtremLowPulse){
+  }else if(normalPulse >= ExtremLowNormalPulse){
       alarmStatus = 3;
       pulseStatus = 4;
       Serial.println("Extrem low pulse please cheack on patient");

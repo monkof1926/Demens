@@ -111,7 +111,8 @@ class Gpss{
   void SafeZoneCheck(){
     while(gpsLat != 6 && gpsLon != 6 && inHomeZone == 0){
       // if(gpsLat == 6 && gpsLon == 6){
-        
+        //   HomeZoneLat = 55.718830;
+        //   HomeZoneLon = 12.530630;
       // }
       if(distance(gpsLat, gpsLon, HomeZoneLat, HomeZoneLon) > SafeZoneRadius ){
         inSafeZone = 1;

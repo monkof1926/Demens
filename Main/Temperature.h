@@ -10,7 +10,7 @@ double normalTemp;
 double tempInterval = 0;
 double highTemp = normalTemp + 1;
 double lowTemp = normalTemp - 0.5;
-int temphealth;
+int tempStatus;
 int normalTempHealth;
 
 int  temperaturePin = 0;
@@ -60,31 +60,39 @@ class Temperature{
     }
   }
 
+  //Health status uses temphealth and puslsestatus to calculate overall health score for good health a score of 80 to 100 is need
+  // all good = 50
+  // high temperature = 27
+  // extremly high temperature = 13
+  // low temperature = 6
+  // extremly low temperature = 4
+  //dont't have all the sensor need to make a real early warning score
+
   void TempStatus(){
     if(temp >= highTemp){
-      temphealth = 1;
+      tempStatus = 27;
       Serial.println("High temperature please check on them ");
     }else if(temp >= ExtremHighTemp){
-      temphealth = 2;
+      tempStatus = 13;
       Serial.println("The Patient have a faber please help them ");
     }else if(temp <= lowTemp){
-      temphealth =3;
+      tempStatus = 6;
       Serial.println("Low temp help them!");
     }else if(temp <= ExtremLowTemp){
-      temphealth = 4;
+      tempStatus = 4;
       Serial.println("The patitent have extramly low temperature ");
     }else{
-      temphealth = 0;
+      tempStatus = 50;
     }
   }
 
   void normalTempStatus(){
     if(normalTemp >= highTemp || normalTemp >= ExtremHighTemp){
-      temphealth = 5;
+      tempStatus = 20;
       normalTempHealth = 1;
       Serial.println("High normal temperature");
     }else if(normalTemp <= lowTemp || normalTemp <= ExtremLowTemp){
-      temphealth = 6;
+      tempStatus = 10;
       normalTempHealth = 2;
       Serial.println("Low normal temperature");
     }
