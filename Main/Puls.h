@@ -12,8 +12,8 @@ PulseSensorPlayground pulseSensor;
 int BPM = pulseSensor.getBeatsPerMinute();
 int normalPulse = 0;
 int restingPulse;
-int HighPulse = BPM + 50;
-int LowPulse = BPM - 50;
+int HighPulse = 130;
+int LowPulse = 40;
 int HighNormalPulse = normalPulse + 50;
 int LowNormalPulse = normalPulse - 50;
 int alarmStatus;
@@ -151,27 +151,29 @@ class Puls{
   // low pulse = 10
   // extremly low pulse = 5
   
-  void pulsStatus(){
-    if(BPM == 0){
-    alarmStatus = 0;
-    pulseStatus = 0;
-    Serial.println("Need more time to get normal pulse ");
-  }else if(BPM <= HighPulse){
+  int pulsStatus(){
+    int BPM12 = pulseSensor.getBeatsPerMinute();
+    
+    if(BPM12 <= HighPulse){
       alarmStatus = 1;
       pulseStatus = 30;
       Serial.println("High pulse please lookout ");
-  }else if(BPM <= ExtremHighPulse){
+      return pulseStatus;
+  }else if(BPM12 <= ExtremHighPulse){
       alarmStatus = 3;
       pulseStatus = 20;
       Serial.println("Extrem high pulse get them help now!!");
-  }else if(BPM >= LowPulse){
+      return pulseStatus;
+  }else if(BPM12 >= LowPulse){
       alarmStatus = 1;
       pulseStatus = 10;
       Serial.println("Low puls Check it stis ok");
-  }else if(BPM >= ExtremLowPulse){
+      return pulseStatus;
+  }else if(BPM12 >= ExtremLowPulse){
       alarmStatus = 3;
       pulseStatus = 5;
       Serial.println("Extrem low pulse please cheack on patient");
+      return pulseStatus;
     }
   }
 

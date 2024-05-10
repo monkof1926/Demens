@@ -8,6 +8,7 @@
 #include "Wifi.h"
 #include "Temperature.h"
 #include "Health.h"
+#include "Screen.h"
 
 #define UPDATEINTERVAL 6000
 #define Name "Lukas"
@@ -29,7 +30,8 @@ const int pulseBlink = LED_BUILTIN; // Led for puls sensor Might need to change 
 int pulseFade = 5; // How long a blink will last for puls sensor
 int pulseFadeRate = 0; // how long it takes for the fading takes
 
-
+int screenSDA = 21;
+int screenSCL = 22;
 
 unsigned long updateTimer = 0;
 unsigned long updateStart = 1000;
@@ -47,6 +49,7 @@ Wifi wifi;
 Puls puls1(pulsePin, pulseBlink, pulseFade, pulseFadeRate);
 Lora lora;
 Health health;
+Screen screen;
 
 String needHelp = "No";
 
@@ -69,6 +72,9 @@ void setup() {
   SPI.begin(SCK,MISO,MOSI,SS);
   LoRa.setPins(SS,RST,DI0);
   Wire.begin(21, 22);
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.clearDisplay();
+  display.display();
    if (!axp.begin(Wire, AXP192_SLAVE_ADDRESS)) {
     Serial.println("AXP192 Begin PASS");
   } else {
@@ -96,19 +102,21 @@ void setup() {
 }
 
 void loop() { 
+  if(inHomeZone == 1 && inSafeZone == 1 || inHomeZone == 1 && inSafeZone == 0 || inHomeZone == 0 && inSafeZone == 1  ){
+  screen.displayClock();
+  }else if(inHomeZone == 0 && inSafeZone == 0 ){
+    screen.displayArrow();
+  }
   if(millis() - updateTimer > UPDATEINTERVAL || updateTimer == 0 ){
     gps1.location();
     //gps1.safeZone();
-    //gps1.HomeZoneCheck();
-    //gps1.SafeZoneCheck();
+    gps1.HomeZoneCheck();
+    gps1.SafeZoneCheck();
     //gps1.HomeSafeZone();
-    Serial.print("Latitue: ");
-    Serial.println(gpsLat);
-    Serial.print("Lontitue: ");
-    Serial.println(gpsLon); 
+    gps1.timer();
     puls1.bpm3();
-    Serial.println(puls1.bpm3());
     puls1.getNormalPulse();
+    puls1.pulsStatus();
     puls1.getRestingPulse();
     puls1.normalPulseCheck();
     temperature.tempCheck();
@@ -131,6 +139,9 @@ void loop() {
     
     updateTimer = millis();
   }     
+  if(ExtremHealth == 1){
+    statusupdate();
+  }
 }
 
 String urlUpdate(){

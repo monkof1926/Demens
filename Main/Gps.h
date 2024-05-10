@@ -1,6 +1,7 @@
 #include <TinyGPS++.h>
 #include <axp20x.h>
 #include <LoRa.h>
+#include <TimeLib.h>
 
 //tineGps object 
 TinyGPSPlus gps;
@@ -12,6 +13,22 @@ double gpsAlt = (gps.altitude.meters());
 
 bool inSafeZone = 0;
 bool inHomeZone = 0;
+double HomeZoneLat;
+double HomeZoneLon;
+
+byte Second;
+byte Minute;
+byte Hour;
+byte lastSecond;
+
+byte Day;
+byte Month;
+int Year;
+
+char Time[] = "Time: 00:00:00";
+char Date[] = "Date: 00/00-2000";
+
+int time_offset = 7200;
 
 class Gpss{
 
@@ -89,7 +106,7 @@ class Gpss{
   }
 
   void HomeZoneCheck(){
-    while(gpsLat != 6 && gpsLon != 6){
+    while(gpsLat == 6 && gpsLon == 6){
       // if(gpsLat == 6 && gpsLon == 6){
       //   HomeZoneLat = 55.718830;
       //   HomeZoneLon = 12.530630;
@@ -109,7 +126,7 @@ class Gpss{
   }
 
   void SafeZoneCheck(){
-    while(gpsLat != 6 && gpsLon != 6 && inHomeZone == 0){
+    while(gpsLat == 6 && gpsLon == 6 && inHomeZone == 0){
       // if(gpsLat == 6 && gpsLon == 6){
         //   HomeZoneLat = 55.718830;
         //   HomeZoneLon = 12.530630;
@@ -138,6 +155,55 @@ class Gpss{
     double d = earthRadius * c;
 
     return d;
+  }
+
+  void timer(){
+    // char time [] = Hour + Minute + Second;
+   
+    if(gps.time.isValid()){
+      Second = gps.time.second();
+      Minute = gps.time.minute();
+      Hour = gps.time.hour();
+
+      Serial.print("Time: ");
+      Serial.print(Hour);
+      Serial.print(":");
+      Serial.print(Minute);
+      Serial.print(":");
+      Serial.println(Second);
+    }
+    if(gps.date.isValid()){
+      Day = gps.date.day();
+      Month = gps.date.month();
+      Year = gps.date.year();
+
+      Serial.print("Date: ");
+      Serial.print(Day);
+      Serial.print("/");
+      Serial.print(Month);
+      Serial.print("/");
+      Serial.println(Year);
+    }
+    if(lastSecond != gps.time.second()){
+      lastSecond = Second;
+      setTime(Hour, Minute, Second, Day, Month, Year);
+      adjustTime(time_offset);
+
+      Time[12] = second() / 10 + '0';
+      Time[13] = second() % 10 + '0';
+      Time[9] = minute() / 10 + '0';
+      Time[10] = minute() % 10 + '0';
+      Time[6] = hour() / 10 + '0';
+      Time[7] = hour() % 10 + '0';
+
+      Date[14] = (year() / 10) % 10 +'0';
+      Date[15] = year() % 10 + '0';
+      Date[9] = month() / 10 +  '0';
+      Date[10] = month() % 10 + '0';
+      Date[6] = day() / 10 + '0';
+      Date[7] = day() % 10 + '0';
+    }
+
   }
 
   void safeZone(){

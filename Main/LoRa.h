@@ -18,7 +18,7 @@ class Lora{
 
   void LoRaCall(){
     Serial.print("Sending pactket: ");
-    Serial.println(counter);
+    Serial.println(counter );
     // ttn.personalize(devAddr, nwkSKey, appSKey);
 
     LoRa.beginPacket();
