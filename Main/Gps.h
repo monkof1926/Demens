@@ -25,8 +25,8 @@ byte Day;
 byte Month;
 int Year;
 
-char Time[] = "Time: 00:00:00";
-char Date[] = "Date: 00/00-2000";
+char Time[] = "Time:00:00:00";
+char Date[] = "Date:00/00-2000";
 
 int time_offset = 7200;
 

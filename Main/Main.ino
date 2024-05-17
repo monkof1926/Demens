@@ -39,8 +39,8 @@ unsigned long start = millis();
 int pulseThreshold = 550;
 
 String finalurl; 
-String url = "https://script.google.com/macros/s/AKfycbzQdija-bhmHUIo_8SYeGyZhftxXBjiEZiswR9ajAqFUqpOA5hRqdJlAScjDWILAwiXHg/exec?";
-String api_key = "AKfycbzQdija-bhmHUIo_8SYeGyZhftxXBjiEZiswR9ajAqFUqpOA5hRqdJlAScjDWILAwiXHg";
+String url = "https://script.google.com/macros/s/AKfycbz15gCPmmGvLAgM-Vh5nfInJRi7SafzYq-hJadaY74RRNUR6bd9mHUvzwJEXuqBRDPwxw/exec?";
+String api_key = "AKfycbz15gCPmmGvLAgM-Vh5nfInJRi7SafzYq-hJadaY74RRNUR6bd9mHUvzwJEXuqBRDPwxw";
 String payload;
 
 
@@ -50,8 +50,6 @@ Puls puls1(pulsePin, pulseBlink, pulseFade, pulseFadeRate);
 Lora lora;
 Health health;
 Screen screen;
-
-String needHelp = "No";
 
 AXP20X_Class axp;
 HardwareSerial GPS(1);
@@ -123,7 +121,12 @@ void loop() {
     temperature.normalTempCheck();
     temperature.TempStatus();
     health.calculateHealthScore();
-    health.healthbuilt();
+    health.extremLowHealthBuilt();
+    health.extremHighHealthBuilt();
+    health.HighHealthBuilt();
+    health.LowHealthBuilt();
+    health.GoodHealthBuilt();
+    //health.healthbuilt();
     health.ExtremHealthStatus();
     health.coldTemperature();
     wifi.wifiCheck2(); 
@@ -149,7 +152,7 @@ String urlUpdate(){
      
   if(inHomeZone == 0 && inSafeZone == 0 || ExtremHealth == 1){
 
-    finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&puls=" + BPM  + "&temp=" + temp + "&latitude=" + gpsLat + "&longitude=" + gpsLon + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus;
+    finalurl = url + "name=" + Name + "&unit=" + Unit + "&health=" + healthStatus + "&puls=" + BPM  + "&temp=" + temp + "&latitude=" + gpsLat + "&longitude=" + gpsLon + "&ishome=" + inHomeZone + "&insafe=" + inSafeZone + "&needHelp=" + needHelp + "&alarmstatus=" + alarmStatus + "&time=" + Time + "&date=" + Date;
     return finalurl;
 
   }else if(inHomeZone == 0 && inSafeZone == 1){

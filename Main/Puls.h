@@ -119,6 +119,7 @@ class Puls{
       LoRa.print(BPM21);
       LoRa.endPacket();   
       BPM = BPM21;  
+      return BPM;
     }
     return BPM;
   }
