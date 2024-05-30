@@ -66,9 +66,7 @@ class Puls{
     pulseSensor.fadeOnPulse(pulseFade);
 
     pulseSensor.setSerial(Serial);
-    //pulseSensor.setOutputType(outputType);
     pulseSensor.setThreshold(pulseThreshold);
-
   }
 
 
@@ -78,7 +76,7 @@ class Puls{
         pulseSensor.begin();
         Serial.println("The sensor works" + pulseSignal);
       }else if(pulseSignal < 250){
-      //for(;;){ // Infinite For loop
+      //for(;;){ // Infinite For loop for testing
         Serial.println("Move the sensor closer");
       //}
       }else{
@@ -109,20 +107,21 @@ class Puls{
       pulseSensor.outputBeat();
     }
   }
-
+  // gets the bpm  and puts it in the global value BPM and sends it over LoRa and prints to terminal
   int bpm3(){
     if(pulseSensor.sawStartOfBeat()){
-      int BPM21 = pulseSensor.getBeatsPerMinute();
+      //int BPM21 = pulseSensor.getBeatsPerMinute();
       Serial.println("Your BPM is: ");
-      Serial.println(BPM21);
+      Serial.println(BPM);
       LoRa.beginPacket();
-      LoRa.print(BPM21);
+      LoRa.print(BPM);
       LoRa.endPacket();   
-      BPM = BPM21;  
-      return BPM;
+      //BPM = BPM21;  
+      
     }
     return BPM;
   }
+  //gets the normal pulse 
   int getNormalPulse(){
     int BPM23 = pulseSensor.getBeatsPerMinute();
     if(pulseSensor.sawStartOfBeat()){
@@ -151,7 +150,7 @@ class Puls{
   // extremly high pulse = 20
   // low pulse = 10
   // extremly low pulse = 5
-  
+  // the values used by pulsStatus is made by me 
   int pulsStatus(){
     int BPM12 = pulseSensor.getBeatsPerMinute();
     
@@ -176,8 +175,9 @@ class Puls{
       Serial.println("Extrem low pulse please cheack on patient");
       return pulseStatus;
     }
+    return pulseStatus;
   }
-
+// check resting pulse and set alarm if needed and prints pulse status and pulse value
   int getRestingPulse(){
     int BPM24 = pulseSensor.getBeatsPerMinute();
     if(pulseSensor.sawStartOfBeat()){
@@ -199,7 +199,7 @@ class Puls{
     }
   }
 
-
+// check normal pulse and set alarm if needed and prints pulse status and pulse value
 void normalPulseCheck(){
   if(normalPulse == 0){
     alarmStatus = 0;

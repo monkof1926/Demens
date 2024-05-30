@@ -85,17 +85,16 @@ class Temperature{
       tempStatus = 50;
     }
   }
-
-  void normalTempStatus(){
-    if(normalTemp >= highTemp || normalTemp >= ExtremHighTemp){
-      tempStatus = 20;
-      normalTempHealth = 1;
-      Serial.println("High normal temperature");
-    }else if(normalTemp <= lowTemp || normalTemp <= ExtremLowTemp){
-      tempStatus = 10;
-      normalTempHealth = 2;
-      Serial.println("Low normal temperature");
+  // Looks at the normal temperature and checks it vs the extreme temperatures
+    void normalTempStatus(){
+      if(normalTemp >= highTemp || normalTemp >= ExtremHighTemp){
+        tempStatus = 20;
+        normalTempHealth = 1;
+        Serial.println("High normal temperature");
+      }else if(normalTemp <= lowTemp || normalTemp <= ExtremLowTemp){
+        tempStatus = 10;
+        normalTempHealth = 2;
+        Serial.println("Low normal temperature");
+      }
     }
-  }
-
 };
